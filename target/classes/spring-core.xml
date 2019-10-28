@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:component-scan base-package="org.xq.shiro"/>
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql:///test"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!--配置数据源-->
+        <property name="dataSource" ref="dataSource"/>
+        <!--mybatis的pojo别名设置-->
+        <property name="typeAliasesPackage" value="org.xq.shiro.pojo"/>
+        <!--mybatis的映射文件-->
+        <property name="mapperLocations" value="classpath:mapper/*Dao.xml"/>
+        <!--mybatis的配置文件-->
+        <property name="configLocation" value="classpath:sqlMapConfig.xml"/>
+    </bean>
+    <!--mybatis的Mapper接口扫描器-->
+    <bean id="configurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="org.xq.shiro.dao"/>
+    </bean>
+    <!--启动事务自动代理配置-->
+    <aop:aspectj-autoproxy/>
+    <!--启动事务的注解-->
+    <tx:annotation-driven/>
+
+    <!--配置Shiro的默认Web应用的安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!--注入自定义的Realm-->
+        <property name="realm" ref="myRealm"/>
+        <property name="cacheManager" ref="cacheManager">
+
+        </property>
+    </bean>
+
+    <bean id="myRealm" class="org.xq.shiro.common.ShiroRealm">
+        <!--给自定义的realm配置加密算法类-->
+        <property name="credentialsMatcher" ref="hashedCredentialsMatcher">
+
+        </property>
+    </bean>
+    <!--配置ehcache的缓存，用于缓存Shiro的授权信息-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <!--注入缓存策略配置文件 ehcache.xml-->
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"></property>
+    </bean>
+
+    <!--shiro 加密算法配置类-->
+    <bean id="hashedCredentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <!--配置算法名称-->
+        <property name="hashAlgorithmName" value="MD5"/>
+        <!--迭代次数-->
+        <property name="hashIterations" value="111"/>
+     </bean>
+
+    <!--shiro的过滤器工厂类-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--给工厂类设置Shiro的安全管理器-->
+        <property name="securityManager" ref="securityManager"/>
+
+        <property name="loginUrl" value="/login.jsp"/>
+        <!--登录成功后跳转的页面-->
+        <property name="successUrl" value="/index.jsp"/>
+        <!--授权失败后要跳转的页面-->
+        <property name="unauthorizedUrl" value="/unauthorized.jsp"/>
+        <!--授权过滤配置定义-->
+        <property name="filterChainDefinitions">
+
+            <value>
+                <!--登录url允许匿名访问-->
+                /login* = anon
+                <!--静态资源URL 允许匿名访问-->
+                /js/* = anon
+                /css/* = anon
+                <!-- 拥有user角色的用户才能访问/emp/*的URL地址 -->
+               <!-- /emp/* = roles[user]
+                /admin* = roles[admin]-->
+                <!--注销设置, 自动清空session, 跳转到登录页-->
+                /logout = logout
+                <!--其他的所有url 请求都需要认证后访问-->
+                /** = authc
+            </value>
+        </property>
+    </bean>
+</beans>

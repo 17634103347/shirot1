@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/css/bootstrap.css"/>
+    <script type="text/javascript" src="/webjars/jquery/3.0.0/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid" align="center">
+    <p></p>
+    <h3> 员工管理</h3>
+    <div align="right" style="width: 80%">
+        <!--添加按钮-->
+        <!-- 按钮触发模态框 -->
+        <button class="btn btn-danger" data-toggle="modal" data-target="#myModal">添加</button>
+    </div>
+    <p></p>
+
+    <div style="width: 80%; align-content: center">
+        <form id="empForm">
+            <!--隐藏的当前页数-->
+            <input type="hidden" name="pageNum" id="pageNum" value="1">
+            <!--隐藏的总页数-->
+            <input type="hidden" name="totalNum" id="totalNum" value="0">
+            <table id="mytable" class="table table-bordered" align="center">
+                <tr>
+                    <th>编号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>入职日期</th>
+                    <th>工资</th>
+                    <th>部门</th>
+                    <th>操作</th>
+                </tr>
+                
+            </table>
+            <div>
+                <a href="#" id="firstPage">首页</a>
+
+                <a href="#" id="prePage">上一页</a>
+                <a href="#" id="nextPage">下一页</a>
+                <a href="#" id="lastPage">尾页</a>
+                总页数: <span id="totalPage" style="color: red"></span>
+                当前页: <span id="currentPage" style="color: red"> </span>
+            </div>
+        </form>
+    </div>
+
+</div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="width: 800px; overflow: auto">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">添加员工</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addForm" class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label for="ename" class="col-sm-2 control-label">姓名:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="ename" name="ename" placeholder="请输入名字">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sex" class="col-sm-2 control-label">性别:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="sex" name="sex" placeholder="请输入性别">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="age" class="col-sm-2 control-label">年龄:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="age" name="age" placeholder="请输入年龄">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="statdata" class="col-sm-2 control-label">入职日期:</label>
+                        <div class="col-sm-10">
+                            <input type="date" class="form-control" id="statdata" name="statdata">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary" class="col-sm-2 control-label">工资:</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="salary" name="salary" placeholder="请输入工资">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="did" class="col-sm-2 control-label">所属部门:</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="did" name="did">
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn " id="submit" data-dismiss="modal">提交</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+
+</div>
+<script>
+
+    var row_item;
+    //点击打开编辑窗口
+    function doEdit(row_index) {
+        console.log("item==" + JSON.stringify(row_item[row_index]))
+        $("#eid").val(row_item[row_index].eid);
+        $("#ename").val(row_item[row_index].ename);
+        $("#sex").val(row_item[row_index].sex);
+        $("#age").val(row_item[row_index].age);
+        $("#statdata").val(row_item[row_index].statdata);
+        $("#salary").val(row_item[row_index].salary);
+        $("#did").val(row_item[row_index].did);
+        $("#myModal").show();
+    }
+    $(function () {
+
+        /*$("#edit").on("click", function () {
+
+        })*/
+
+        //添加提交事件
+        $("#submit").on("click", function () {
+                var form = $("#addForm");
+                $.ajax({
+                    url: '/emp/add',
+                    dataType: 'json',
+                    type: 'post',
+                    data: form.serialize(), //传入表单参数
+                    success: function (result) {
+                        if (result.status == 200) {
+                            //重新加载当前列表
+                            load(0);
+                        }
+                    }
+                });
+            }
+        );
+        //首页点击事件
+        $("#firstPage").on("click", function () {
+            //获取当前页,并转为Int类型
+            var num = parseInt($("#pageNum").val());
+            load(0);
+        });
+        $("#prePage").on("click", function () {
+            //获取当前页,并转为Int类型
+            var num = parseInt($("#pageNum").val());
+            load((num > 0 ? num - 1 : 0));
+        });
+        //下一页
+        $("#nextPage").on("click", function () {
+            //获取当前页,并转为Int类型
+            var num = parseInt($("#pageNum").val());
+            //获取尾页数
+            var totalNum = parseInt($("#totalNum").val());
+            load((num < totalNum ? num + 1 : num));
+        });
+        //尾页点击事件
+        $("#lastPage").on("click", function () {
+            //获取当前页,并转为Int类型
+            var totalNum = parseInt($("#totalNum").val());
+            load(totalNum);
+        });
+
+
+        function load(pageNum) {
+            var form = $("#empForm");
+            //给pageNum元素设置当前页数
+            $("#pageNum").val(pageNum);
+            $.ajax({
+                url: '/emp/query',
+                dataType: 'json',
+                type: 'get',
+                data: form.serialize(), //传入表单参数
+                success: function (result) {
+                    var html;
+                    //删除含有tr-data样式的数据, 删除历史数据
+                    $(".tr-data").remove();
+                    row_item = result.list;//列表对象
+                    $.each(result.list, function (i, item) {
+                        html = "<tr class='tr-data'><td>" + item.eid + "</td><td>" + item.ename + "</td><td>" + item.sex + "</td><td>" + item.age + "</td><td>" + item.statdata + "</td><td>" + item.salary + "</td><td>" + item.did + "</td>"
+                        html += "<td><a href='#' onclick='doEdit(\'"+item.eid+"\')' id='edit'>修改</a>&nbsp;"
+                        html += "<a href='#' id='del' >删除</a></td></tr>";
+
+                        $("#mytable").append(html);
+                    })
+                    //赋值当前页数
+                    $("#pageNum").val(result.pageNum);
+                    $("#currentPage").text(result.pageNum);
+                    //赋值总页数
+                    $("#totalNum").val(result.pages);
+                    $("#totalPage").text(result.pages);
+                }
+            })
+        }
+
+        load(); //加载
+        //加载部门下拉框
+        $.ajax({
+            url: '/emp/deptlist',
+            dataType: 'json',
+            type: 'get',
+            success: function (data) {
+                var optionHtml;
+                $("#did").remove("option");//清空子元素
+                $("#did").append("<option>请选择部门</option>");
+                $.each(data, function (i, item) {
+                    optionHtml = "<option value='" + item.did + "'>" + item.dept_name + "</option> ";
+                    $("#did").append(optionHtml)
+                })
+            }
+        })
+    })
+
+</script>
+</body>
+</html>

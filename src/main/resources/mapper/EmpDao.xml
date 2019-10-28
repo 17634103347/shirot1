@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="org.xq.shiro.dao.EmpDao">
+<!--auto generated Code-->
+    <resultMap id="AllColumnMap" type="org.xq.shiro.pojo.Emp">
+        <result column="eid" property="eid"/>
+        <result column="ename" property="ename"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="statdata" property="statdata"/>
+        <result column="salary" property="salary"/>
+        <result column="did" property="did"/>
+    </resultMap>
+
+<!--auto generated Code-->
+    <sql id="all_column">
+        eid,
+        ename,
+        sex,
+        age,
+        statdata,
+        salary,
+        did
+    </sql>
+
+<!--auto generated Code-->
+    <insert id="insert">
+        INSERT INTO emp
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pojo.eid != null"> eid, </if>
+            <if test="pojo.ename != null"> ename, </if>
+            <if test="pojo.sex != null"> sex, </if>
+            <if test="pojo.age != null"> age, </if>
+            <if test="pojo.statdata != null"> statdata, </if>
+            <if test="pojo.salary != null"> salary, </if>
+            <if test="pojo.did != null"> did, </if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pojo.eid != null"> #{pojo.eid}, </if>
+            <if test="pojo.ename != null"> #{pojo.ename}, </if>
+            <if test="pojo.sex != null"> #{pojo.sex}, </if>
+            <if test="pojo.age != null"> #{pojo.age}, </if>
+            <if test="pojo.statdata != null"> #{pojo.statdata}, </if>
+            <if test="pojo.salary != null"> #{pojo.salary}, </if>
+            <if test="pojo.did != null"> #{pojo.did}, </if>
+        </trim>
+    </insert>
+
+<!--auto generated Code-->
+    <insert id="insertList">
+        INSERT INTO emp(
+        <include refid="all_column"/>
+        )VALUES
+        <foreach collection="pojos" item="pojo" index="index" separator=",">
+            (
+            #{pojo.eid},
+            #{pojo.ename},
+            #{pojo.sex},
+            #{pojo.age},
+            #{pojo.statdata},
+            #{pojo.salary},
+            #{pojo.did}
+            )
+        </foreach>
+    </insert>
+
+<!--auto generated Code-->
+    <update id="update">
+        UPDATE emp
+        <set>
+            <if test="pojo.eid != null"> eid = #{pojo.eid}, </if>
+            <if test="pojo.ename != null"> ename = #{pojo.ename}, </if>
+            <if test="pojo.sex != null"> sex = #{pojo.sex}, </if>
+            <if test="pojo.age != null"> age = #{pojo.age}, </if>
+            <if test="pojo.statdata != null"> statdata = #{pojo.statdata}, </if>
+            <if test="pojo.salary != null"> salary = #{pojo.salary}, </if>
+            <if test="pojo.did != null"> did = #{pojo.did} </if>
+        </set>
+         WHERE id = #{pojo.id}
+    </update>
+
+<!--auto generated Code-->
+    <select id="select" resultMap="AllColumnMap">
+        SELECT <include refid="all_column"/>
+        FROM emp
+        <where>
+            <if test="pojo.eid != null"> AND eid = #{pojo.eid} </if>
+            <if test="pojo.ename != null"> AND ename = #{pojo.ename} </if>
+            <if test="pojo.sex != null"> AND sex = #{pojo.sex} </if>
+            <if test="pojo.age != null"> AND age = #{pojo.age} </if>
+            <if test="pojo.statdata != null"> AND statdata = #{pojo.statdata} </if>
+            <if test="pojo.salary != null"> AND salary = #{pojo.salary} </if>
+            <if test="pojo.did != null"> AND did = #{pojo.did} </if>
+        </where>
+        order by eid desc
+    </select>
+
+<!--auto generated Code-->
+    <delete id="delete">
+        DELETE FROM emp where id = #{id}
+    </delete>
+</mapper>
